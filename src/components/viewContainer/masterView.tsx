@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import ViewSection from './viewSection';
 import ImageLink from './imageLink';
-import SearchField from "react-search-field";
+import SearchField from "./searchfield";
 
 
 interface Props {
@@ -11,11 +11,7 @@ interface Props {
 /** React function component */
 export default function MasterView(props: Props) {
 
-    return <SearchField
-    placeholder="Search..."
-    searchText="This is initial search text"
-    classNames="test-class"
-  />;
+    return <SearchField />;
 }
 
 const container: CSSProperties = {
