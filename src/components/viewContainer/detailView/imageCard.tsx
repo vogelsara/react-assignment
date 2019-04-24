@@ -2,6 +2,8 @@ import React, { Component, CSSProperties, Fragment } from 'react';
 import Spinner from '../../spinner';
 import Modal from '../../modal';
 import { ThemedCSSProperties, ThemeContext, ThemeState } from '../../../contexts/themeContext';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import ls from 'local-storage';
 
 export interface ImageUrls {
     full: string
@@ -13,17 +15,70 @@ export interface ImageUrls {
 
 interface Props {
     urls: ImageUrls
+    view: string
+    isLiked: boolean
 }
+
 interface State {
     isHover: boolean
     isModalOpen: boolean
+    isLiked: boolean
 }
 
-export default class ImageCard extends Component<Props> {
+export default class ImageCard extends Component<Props, State> {
 
-    state: State = {
-        isHover: false,
-        isModalOpen: false
+    constructor(props: Props) {
+        super(props)
+
+        this.state = {
+            isHover: false,
+            isModalOpen: false,
+            isLiked: props.isLiked
+        }
+
+        this.onLikeCkilck = this.onLikeCkilck.bind(this);
+    }
+
+    getLikedImages() {
+        if (!ls.get(this.props.view)) {
+            return [];
+        } else {
+            return ls.get(this.props.view);
+        }
+    }
+
+    addLikedImage(urls: ImageUrls) {
+        let likedImages: ImageUrls[] = this.getLikedImages();
+        likedImages.push(urls);
+        ls.set(this.props.view, likedImages);
+    }
+
+    removeLikedImage(urls: ImageUrls) {
+        let likedImages: ImageUrls[] = this.getLikedImages();
+        console.log("----------------->>>");
+        console.log(likedImages);
+        this.removeElementFromImageUrlsArray(likedImages, urls);
+        console.log(likedImages);
+        console.log("-----------------<<<");
+        ls.set(this.props.view, likedImages);
+    }
+
+    removeElementFromImageUrlsArray(array: ImageUrls[], item: ImageUrls) {
+        for (let i = 0; i < array.length; i++) {
+            if (array[i].full === item.full) {
+                console.log("Found");
+                array.splice(i, 1);
+                return;
+            }
+        }
+        console.log("Haven't found");
+    }
+
+    iconClassName() {
+        if (this.props.isLiked) {
+            return 'large heart icon'
+        }
+        return 'large outline heart icon'
     }
 
     style(theme: ThemeState): CSSProperties {
@@ -42,6 +97,21 @@ export default class ImageCard extends Component<Props> {
     openModal = () => this.setState({ isModalOpen: true });
     closeModal = () => this.setState({ isModalOpen: false });
 
+    onLikeCkilck(event) {
+        if (this.state.isLiked) {
+            this.setState({
+                isLiked: false
+            });
+            this.removeLikedImage(this.props.urls);
+        } else {
+            this.setState({
+                isLiked: true
+            });
+            this.addLikedImage(this.props.urls);
+        }
+        event.stopPropagation();
+    }
+
     render() {
         const { urls } = this.props
         return (
@@ -49,13 +119,21 @@ export default class ImageCard extends Component<Props> {
                 <ThemeContext.Consumer>
                     {({ theme }) => (
                         <div
-                            style={this.style(theme)}
-                            onMouseEnter={this.onMouseEnter}
-                            onMouseLeave={this.onMouseLeave}
-                            onClick={this.openModal}
-                        >
-                            {urls.small ? <img src={urls.small} style={card}/> : <Spinner/>}
-                        </div>
+                        style={this.style(theme)}
+                        onMouseEnter={this.onMouseEnter}
+                        onMouseLeave={this.onMouseLeave}
+                        onClick={this.openModal}
+                    >
+                        {this.props.urls.small ? 
+                        <div style={cardContainer}> 
+                            {this.state.isLiked ? <FaHeart onClick={this.onLikeCkilck}/> : <FaRegHeart onClick={this.onLikeCkilck} />}
+                            <img 
+                                src={this.props.urls.small} 
+                                style={card}
+                            /> 
+                        </div> 
+                        : <Spinner/> }
+                    </div>
                     )}
                 </ThemeContext.Consumer>
                 {
@@ -88,4 +166,18 @@ const preview: CSSProperties = {
     width: '100%',
     height: '100%',
     objectFit: 'contain'
+}
+
+const likeIcon: CSSProperties = {
+    color: 'red',
+    position: 'absolute',
+    top: '8px',
+    right: '16px',
+    zIndex: 100,
+    cursor: 'pointer'
+}
+
+const cardContainer: CSSProperties = {
+    height: '100%',
+    position: 'relative'
 }
