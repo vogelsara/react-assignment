@@ -55,30 +55,17 @@ export default class ImageCard extends Component<Props, State> {
 
     removeLikedImage(urls: ImageUrls) {
         let likedImages: ImageUrls[] = this.getLikedImages();
-        console.log("----------------->>>");
-        console.log(likedImages);
         this.removeElementFromImageUrlsArray(likedImages, urls);
-        console.log(likedImages);
-        console.log("-----------------<<<");
         ls.set(this.props.view, likedImages);
     }
 
     removeElementFromImageUrlsArray(array: ImageUrls[], item: ImageUrls) {
         for (let i = 0; i < array.length; i++) {
             if (array[i].full === item.full) {
-                console.log("Found");
                 array.splice(i, 1);
                 return;
             }
         }
-        console.log("Haven't found");
-    }
-
-    iconClassName() {
-        if (this.props.isLiked) {
-            return 'large heart icon'
-        }
-        return 'large outline heart icon'
     }
 
     style(theme: ThemeState): CSSProperties {
